@@ -1,26 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Campfire</title>
     <style>
+        body,
+        html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         body {
             background-color: #123456;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #campfire {
+            position: absolute;
+            width: 100%;
+            top: calc(100vh - 250px);
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: flex-end;
-            height: calc(100vh - 10px);
         }
+
         img {
             image-rendering: -moz-crisp-edges;
             image-rendering: -webkit-crisp-edges;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
+
+        @-webkit-keyframes snowflakes-fall {
+            0% {
+                top: -10%
+            }
+
+            100% {
+                top: 100%
+            }
+        }
+
+        @-webkit-keyframes snowflakes-shake {
+            0% {
+                -webkit-transform: translateX(0px);
+                transform: translateX(0px)
+            }
+
+            50% {
+                -webkit-transform: translateX(80px);
+                transform: translateX(80px)
+            }
+
+            100% {
+                -webkit-transform: translateX(0px);
+                transform: translateX(0px)
+            }
+        }
+
+        @keyframes snowflakes-fall {
+            0% {
+                top: -10%
+            }
+
+            100% {
+                top: 100%
+            }
+        }
+
+        @keyframes snowflakes-shake {
+            0% {
+                transform: translateX(0px)
+            }
+
+            50% {
+                transform: translateX(80px)
+            }
+
+            100% {
+                transform: translateX(0px)
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10%;
+            size: 2rem;
+            color: #ffffff;
+            z-index: -1;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            cursor: default;
+            -webkit-animation-name: snowflakes-fall, snowflakes-shake;
+            -webkit-animation-duration: 10s, 3s;
+            -webkit-animation-timing-function: linear, ease-in-out;
+            -webkit-animation-iteration-count: infinite, infinite;
+            -webkit-animation-play-state: running, running;
+            animation-name: snowflakes-fall, snowflakes-shake;
+            animation-duration: 10s, 3s;
+            animation-timing-function: linear, ease-in-out;
+            animation-iteration-count: infinite, infinite;
+            animation-play-state: running, running
+        }
     </style>
 </head>
+
 <body>
-    <img src="campfire.gif" alt="campfire"  width=250/>    
+    <div id="snowflakes"></div>
+    <div id="campfire"><img src="campfire.gif" alt="campfire" width=250 /> </div>
 </body>
+<script>
+    (() => {
+        const snowflakes = 300;
+        const x_start = 0;
+        const x_end = 100;
+        const t1_start = -10;
+        const t1_end = 0;
+        const t2_start = 0;
+        const t2_end = 4;
+
+        container = document.getElementById("snowflakes");
+        for (let i = 0; i < snowflakes; i++) {
+            const x = Math.floor(Math.random() * (x_end - x_start) + x_start);
+            const t1 = (Math.random() * (t1_end - t1_start) + t1_start);
+            const t2 = (Math.random() * (t1 - t2_start) + t2_start);
+
+            let d = document.createElement('div');
+            d.innerText = '*';
+            d.classList.add('snowflake');
+            let delay_str = `${t1}s,${t2}s`;
+            d.style = `left:${x}%;-webkit-animation-delay:${delay_str};animation-delay:${delay_str};`;
+            container.appendChild(d);
+        }
+    })();
+</script>
+
 </html>
