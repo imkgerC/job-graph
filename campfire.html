@@ -14,7 +14,8 @@
 
         body {
             background: #123456;
-            background: radial-gradient(circle at bottom,#654321 0%, #123456 40%);
+            background: radial-gradient(circle at bottom,#764321 0%, #123456 35%);
+             /*background: radial-gradient(circle at bottom,#764321 0%, rgba(0,0,0,0) 35%), linear-gradient(160deg,#1b4c7e, #123456); */
             height: 100vh;
             overflow: hidden;
         }
@@ -78,12 +79,32 @@
                 transform: translateX(0px)
             }
 
-            50% {
+            15% {
                 transform: translateX(80px)
             }
 
-            100% {
+            30% {
                 transform: translateX(0px)
+            }
+
+            45% {
+                transform: translateX(60px);
+            }
+
+            60% {
+                transform: translateX(0px);
+            }
+
+            75% {
+                transform: translateX(40px);
+            }
+
+            90% {
+                transform: translateX(0px);
+            }
+
+            100% {
+                transform: translateX(10px);
             }
         }
 
@@ -99,12 +120,12 @@
             user-select: none;
             cursor: default;
             -webkit-animation-name: snowflakes-fall, snowflakes-shake;
-            -webkit-animation-duration: 10s, 3s;
+            -webkit-animation-duration: 10s, 10s;
             -webkit-animation-timing-function: linear, ease-in-out;
             -webkit-animation-iteration-count: infinite, infinite;
             -webkit-animation-play-state: running, running;
             animation-name: snowflakes-fall, snowflakes-shake;
-            animation-duration: 10s, 3s;
+            animation-duration: 10s, 10s;
             animation-timing-function: linear, ease-in-out;
             animation-iteration-count: infinite, infinite;
             animation-play-state: running, running
@@ -128,15 +149,23 @@
 
         container = document.getElementById("snowflakes");
         for (let i = 0; i < snowflakes; i++) {
-            const x = Math.floor(Math.random() * (x_end - x_start) + x_start);
+            let x = Math.floor(Math.random() * (x_end - x_start) + x_start);
             const t1 = (Math.random() * (t1_end - t1_start) + t1_start);
             const t2 = (Math.random() * (t1 - t2_start) + t2_start);
 
             let d = document.createElement('div');
             d.innerText = '*';
             d.classList.add('snowflake');
-            let delay_str = `${t1}s,${t2}s`;
+            let delay_str = `${t1}s,${t1}s`;
             d.style = `left:${x}%;-webkit-animation-delay:${delay_str};animation-delay:${delay_str};`;
+            d.addEventListener("animationiteration", (event) => {
+                if (event.animationName === "snowflakes-shake") {
+                } else {
+                    x = Math.floor(Math.random() * (x_end - x_start) + x_start);
+                    let before = d.style.left;
+                    d.style.left = x + "%";
+                }
+            });
             container.appendChild(d);
         }
     })();
