@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Counter</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: #123456;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #main {
+            position: absolute;
+            color: #eee;
+            height: 100%;
+            top: 0%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-end;
+            font-size: xx-large;
+        }
+        
+        #main-container {
+            height: 100%;
+            justify-content: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #counter {
+            text-align: center;
+        }
+        .button {
+            background-color: rebeccapurple;
+            border: none;
+            color: #eee;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: purple;
+        }
+        .button:active {
+            background-color: rebeccapurple;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="main-container">
+            <div id="counter">0.00€</div>
+            <button class="button" id="twenty-five-cents-button">+0.25€</button>
+            <button class="button" id="eight-cents-button">+0.08€</button>
+            <button class="button" id="reset-button">Reset</button>
+        </div>
+    </div>
+</body>
+<script>
+    (() => {
+        
+
+        const updateCounter = () => {
+            localStorage.setItem("counterValue", counterValue);
+            document.getElementById("counter").innerText = `${counterValue.toFixed(2)}€`;
+        }
+
+        const incrementCounter = (value) => {
+            counterValue += value;
+            updateCounter();
+        }
+
+        document.getElementById("twenty-five-cents-button").addEventListener("click", () => incrementCounter(0.25));
+        document.getElementById("eight-cents-button").addEventListener("click", () => incrementCounter(0.08));
+        document.getElementById("reset-button").addEventListener("click", () => {
+            counterValue = 0;
+            updateCounter();
+            localStorage.clear();
+        });
+
+        let counterValue = Number(localStorage.getItem("counterValue"));
+        if (!counterValue) {
+            counterValue = 0.0;
+        }
+        updateCounter(counterValue);
+    })();
+</script>
+
+</html>
