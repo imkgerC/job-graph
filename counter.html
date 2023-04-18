@@ -66,8 +66,18 @@
     <div id="main">
         <div id="main-container">
             <div id="counter">0.00€</div>
-            <button class="button" id="twenty-five-cents-button">+0.25€</button>
-            <button class="button" id="eight-cents-button">+0.08€</button>
+            <div>
+                <button class="button increment-button" data-increment="0.25">+0.25€</button>
+                <button class="button increment-button" data-increment="-0.25">-0.25€</button>
+            </div>
+            <div>
+                <button class="button increment-button" data-increment="0.15">+0.15€</button>
+                <button class="button increment-button" data-increment="-0.15">-0.15€</button>
+            </div>
+            <div>
+                <button class="button increment-button" data-increment="0.08">+0.08€</button>
+                <button class="button increment-button" data-increment="-0.08">-0.08€</button>
+            </div>
             <button class="button" id="reset-button">Reset</button>
         </div>
     </div>
@@ -86,13 +96,19 @@
             updateCounter();
         }
 
-        document.getElementById("twenty-five-cents-button").addEventListener("click", () => incrementCounter(0.25));
-        document.getElementById("eight-cents-button").addEventListener("click", () => incrementCounter(0.08));
         document.getElementById("reset-button").addEventListener("click", () => {
             counterValue = 0;
             updateCounter();
             localStorage.clear();
         });
+
+        const buttons = document.getElementsByClassName("increment-button")
+        for(let i = 0; i < buttons.length; ++i) {
+            buttons[i].addEventListener(
+                "click", 
+                () => incrementCounter(Number(buttons[i].dataset.increment))
+            );
+        };
 
         let counterValue = Number(localStorage.getItem("counterValue"));
         if (!counterValue) {
