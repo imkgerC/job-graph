@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Timetables</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: #eee;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #main {
+            color: #222;
+            padding-top: 1em;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 1em;
+            font-size: 2em;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        
+        #main-container {
+            border: #222 solid 3px;
+            height: 100%;
+            justify-content: top;
+            display: flex;
+            flex-direction: column;
+            padding-left: 0.3em;
+            padding-right: 0.3em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="main-container">
+            <h1>Technologiepark</h1>
+            <iframe 
+                height="400em"
+            src=""
+                id="techonologiepark-iframe"
+                >
+            </iframe>
+        </div>
+        <div id="main-container">
+            <h1>Bunsengymnasium</h1>
+            <iframe 
+                height="400em"
+            src=""
+                id="bunsengymnasium-iframe"
+                >
+            </iframe>
+        </div>
+        <div id="main-container">
+            <h1>Rohrbach Markt</h1>
+            <iframe 
+                height="400em"
+            src=""
+                id="markt-iframe"
+                >
+                </iframe>
+        </div>
+    </div>
+</body>
+<script>
+    (() => {
+        BUNSENGYMNASIUM_MAIN = "REQ0JourneyStopsS0A=1&S=Neuenheim Bunsengymnasium, Heidelberg&REQ0JourneyStopsSID=A=1@O=Neuenheim Bunsengymnasium, Heidelberg@X=8676649@Y=49417012@U=80@L=000518417@B=1@p=1682362737@&REQ0JourneyStopsZ0A=1&Z=Rohrbach Markt, Heidelberg&REQ0JourneyStopsZID=A=1@O=Rohrbach Markt, Heidelberg@X=8688128@Y=49380470@U=80@L=000518488@B=1@p=1682362737@&";
+        TECHNOLOGIEPARK_MAIN = "REQ0JourneyStopsS0A=1&S=Neuenheim+Technologiepark%2C+Heidelberg&REQ0JourneyStopsSID=A%3D1%40O%3DNeuenheim+Technologiepark%2C+Heidelberg%40X%3D8676307%40Y%3D49419223%40U%3D80%40L%3D000518420%40B%3D1%40p%3D1682362737%40&REQ0JourneyStopsZ0A=1&Z=Rohrbach+Markt%2C+Heidelberg&REQ0JourneyStopsZID=A%3D1%40O%3DRohrbach+Markt%2C+Heidelberg%40X%3D8688128%40Y%3D49380470%40U%3D80%40L%3D000518488%40B%3D1%40p%3D1682362737%40&";
+        MARKT_MAIN = "REQ0JourneyStopsS0A=1&S=Rohrbach+Markt%2C+Heidelberg&REQ0JourneyStopsSID=A%3D1%40O%3DRohrbach+Markt%2C+Heidelberg%40X%3D8688128%40Y%3D49380470%40U%3D80%40L%3D000518488%40B%3D1%40p%3D1682362737%40&REQ0JourneyStopsZ0A=1&Z=Neuenheim+Bunsengymnasium%2C+Heidelberg&REQ0JourneyStopsZID=A%3D1%40O%3DNeuenheim+Bunsengymnasium%2C+Heidelberg%40X%3D8676649%40Y%3D49417012%40U%3D80%40L%3D000518417%40B%3D1%40p%3D1682362737%40&";
+
+        BAHN_URL = "https://reiseauskunft.bahn.de/bin/query.exe/dn?start=1&";
+
+        let now = new Date();
+
+        dateOptions = {weekday: "short", day: "numeric", month:"numeric", year:"numeric"};
+        timeOptions = {hour:"numeric", minute:"numeric"};
+
+        TIME_URL = `date=Do., ${now.toLocaleString("de-DE", dateOptions)}&time=${now.toLocaleTimeString("de-DE", timeOptions)}`;
+        URL_SUFFIX = "&timesel=depart&externRequest=yes&HWAI=JS!js=yes!ajax=yes!#overview_updateC0-0";
+        BUNSENGYMNASIUM_URL = BAHN_URL + BUNSENGYMNASIUM_MAIN + TIME_URL + URL_SUFFIX;
+        TECHNOLOGIEPARK_URL = BAHN_URL + TECHNOLOGIEPARK_MAIN + TIME_URL + URL_SUFFIX;
+        MARKT_URL = BAHN_URL + MARKT_MAIN + TIME_URL + URL_SUFFIX;
+
+        document.getElementById("bunsengymnasium-iframe").setAttribute("src", BUNSENGYMNASIUM_URL);
+        document.getElementById("techonologiepark-iframe").setAttribute("src", TECHNOLOGIEPARK_URL);
+        document.getElementById("markt-iframe").setAttribute("src", MARKT_URL);
+    })();
+</script>
+
+</html>
