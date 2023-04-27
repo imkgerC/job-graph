@@ -13,14 +13,14 @@
         }
 
         body {
-            background: #123456;
+            background: #FFF;
             height: 100vh;
             overflow: hidden;
         }
 
         #main {
             position: absolute;
-            color: #eee;
+            color: #222;
             height: 100%;
             top: 0%;
             width: 100%;
@@ -43,7 +43,7 @@
             text-align: center;
         }
         .button {
-            background-color: rebeccapurple;
+            background-color: #123456;
             border: none;
             color: #eee;
             padding: 0.5em 1em;
@@ -55,10 +55,28 @@
             cursor: pointer;
         }
         .button:hover {
-            background-color: purple;
+            background-color: #234567;
         }
         .button:active {
-            background-color: rebeccapurple;
+            background-color: #123456;
+        }
+        .increment-button {
+            background-color: #125634;
+        }
+        .increment-button:hover {
+            background-color: #236745;
+        }
+        .increment-button:active {
+            background-color: #125634;
+        }
+        .decrement-button {
+            background-color: #561234;
+        }
+        .decrement-button:hover {
+            background-color: #672345;
+        }
+        .decrement-button:active {
+            background-color: #561234;
         }
     </style>
 </head>
@@ -68,16 +86,16 @@
         <div id="main-container">
             <div id="counter">0.00€</div>
             <div>
+                <button class="button decrement-button" data-increment="-0.25">-0.25€</button>
                 <button class="button increment-button" data-increment="0.25">+0.25€</button>
-                <button class="button increment-button" data-increment="-0.25">-0.25€</button>
             </div>
             <div>
+                <button class="button decrement-button" data-increment="-0.15">-0.15€</button>
                 <button class="button increment-button" data-increment="0.15">+0.15€</button>
-                <button class="button increment-button" data-increment="-0.15">-0.15€</button>
             </div>
             <div>
+                <button class="button decrement-button" data-increment="-0.08">-0.08€</button>
                 <button class="button increment-button" data-increment="0.08">+0.08€</button>
-                <button class="button increment-button" data-increment="-0.08">-0.08€</button>
             </div>
             <button class="button" id="reset-button">Reset</button>
         </div>
@@ -103,7 +121,7 @@
             localStorage.clear();
         });
 
-        const buttons = document.getElementsByClassName("increment-button")
+        const buttons = document.querySelectorAll("[data-increment]");
         for(let i = 0; i < buttons.length; ++i) {
             buttons[i].addEventListener(
                 "click", 
