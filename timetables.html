@@ -15,7 +15,6 @@
         body {
             background: #eee;
             height: 100vh;
-            overflow: hidden;
         }
 
         #main {
@@ -28,7 +27,7 @@
             justify-content: center;
             align-items: flex-start;
             gap: 1em;
-            font-size: 2em;
+            font-size: 1.7em;
             font-family: Arial, Helvetica, sans-serif;
         }
         
@@ -41,6 +40,38 @@
             padding-left: 0.3em;
             padding-right: 0.3em;
         }
+
+        .departure-on-time {
+            color: green;
+        }
+
+        .departure-late {
+            color: red;
+        }
+
+        tr {
+            border-bottom: #222 solid 1px;
+        }
+
+        th {
+            padding-right: 0.5em;
+        }
+
+        th {
+            padding-left: 0.5em;
+        }
+
+        td {
+            padding-left: 0.5em;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        thead {
+            border-bottom: solid #222;
+        }
     </style>
 </head>
 
@@ -48,55 +79,111 @@
     <div id="main">
         <div id="main-container">
             <h1>Technologiepark</h1>
-            <iframe 
-                height="400em"
-            src=""
-                id="techonologiepark-iframe"
-                >
-            </iframe>
+            <div data-stop-id="08221:1226"></div>
         </div>
         <div id="main-container">
             <h1>Bunsengymnasium</h1>
-            <iframe 
-                height="400em"
-            src=""
-                id="bunsengymnasium-iframe"
-                >
-            </iframe>
+            <div data-stop-id="08221:1228"></div>
         </div>
         <div id="main-container">
             <h1>Rohrbach Markt</h1>
-            <iframe 
-                height="400em"
-            src=""
-                id="markt-iframe"
-                >
-                </iframe>
+            <div data-stop-id="08221:1276"></div>
         </div>
     </div>
 </body>
-<script>
-    (() => {
-        BUNSENGYMNASIUM_MAIN = "REQ0JourneyStopsS0A=1&S=Neuenheim Bunsengymnasium, Heidelberg&REQ0JourneyStopsSID=A=1@O=Neuenheim Bunsengymnasium, Heidelberg@X=8676649@Y=49417012@U=80@L=000518417@B=1@p=1682362737@&REQ0JourneyStopsZ0A=1&Z=Rohrbach Markt, Heidelberg&REQ0JourneyStopsZID=A=1@O=Rohrbach Markt, Heidelberg@X=8688128@Y=49380470@U=80@L=000518488@B=1@p=1682362737@&";
-        TECHNOLOGIEPARK_MAIN = "REQ0JourneyStopsS0A=1&S=Neuenheim+Technologiepark%2C+Heidelberg&REQ0JourneyStopsSID=A%3D1%40O%3DNeuenheim+Technologiepark%2C+Heidelberg%40X%3D8676307%40Y%3D49419223%40U%3D80%40L%3D000518420%40B%3D1%40p%3D1682362737%40&REQ0JourneyStopsZ0A=1&Z=Rohrbach+Markt%2C+Heidelberg&REQ0JourneyStopsZID=A%3D1%40O%3DRohrbach+Markt%2C+Heidelberg%40X%3D8688128%40Y%3D49380470%40U%3D80%40L%3D000518488%40B%3D1%40p%3D1682362737%40&";
-        MARKT_MAIN = "REQ0JourneyStopsS0A=1&S=Rohrbach+Markt%2C+Heidelberg&REQ0JourneyStopsSID=A%3D1%40O%3DRohrbach+Markt%2C+Heidelberg%40X%3D8688128%40Y%3D49380470%40U%3D80%40L%3D000518488%40B%3D1%40p%3D1682362737%40&REQ0JourneyStopsZ0A=1&Z=Neuenheim+Bunsengymnasium%2C+Heidelberg&REQ0JourneyStopsZID=A%3D1%40O%3DNeuenheim+Bunsengymnasium%2C+Heidelberg%40X%3D8676649%40Y%3D49417012%40U%3D80%40L%3D000518417%40B%3D1%40p%3D1682362737%40&";
+<script type="module">
+    await (async () => {
+        async function make_vrn_request(stop) {
+            const fetch_url = "https://corsproxy.io/?" +
+                "https://www.vrn.de/mngvrn/XML_DM_REQUEST?" +
+                "coordOutputFormat=EPSG:4326&depType=stopEvents&" +
+                "includeCompleteStopSeq=1&limit=7&mode=direct&" +
+                `name_dm=de:${stop}&` +
+                "outputFormat=json&type_dm=any&useOnlyStops=1&useRealtime=1";
+            
+            const response = await fetch(fetch_url);
+            return await response.json();
+        }
 
-        BAHN_URL = "https://reiseauskunft.bahn.de/bin/query.exe/dn?start=1&";
+        function get_date_from_json(data) {
+            return new Date(data.year, data.month-1, data.day, data.hour, data.minute);
+        }
 
-        let now = new Date();
+        function create_arrival_component(arrival_data) {
+            const element = document.createElement("tr");
 
-        dateOptions = {weekday: "short", day: "numeric", month:"numeric", year:"numeric"};
-        timeOptions = {hour:"numeric", minute:"numeric"};
+            const destination = arrival_data.servingLine.direction;
+            const line_number = arrival_data.servingLine.number;
+            const planned_time = get_date_from_json(arrival_data.dateTime);
+            
+            let expected_time;
+            if (arrival_data.realDateTime) {
+                expected_time = get_date_from_json(arrival_data.realDateTime);
+            }
+            else {
+                expected_time = undefined
+            }
 
-        TIME_URL = `date=Do., ${now.toLocaleString("de-DE", dateOptions)}&time=${now.toLocaleTimeString("de-DE", timeOptions)}`;
-        URL_SUFFIX = "&timesel=depart&externRequest=yes&HWAI=JS!js=yes!ajax=yes!#overview_updateC0-0";
-        BUNSENGYMNASIUM_URL = BAHN_URL + BUNSENGYMNASIUM_MAIN + TIME_URL + URL_SUFFIX;
-        TECHNOLOGIEPARK_URL = BAHN_URL + TECHNOLOGIEPARK_MAIN + TIME_URL + URL_SUFFIX;
-        MARKT_URL = BAHN_URL + MARKT_MAIN + TIME_URL + URL_SUFFIX;
+            const formatDate = (d) => d ? d.toLocaleTimeString("de-de", {hour: '2-digit', minute:'2-digit'}) : "";
+            const createTd = (text) => {
+                const e = document.createElement("td");
+                e.innerText = text;
+                return e;
+            }
 
-        document.getElementById("bunsengymnasium-iframe").setAttribute("src", BUNSENGYMNASIUM_URL);
-        document.getElementById("techonologiepark-iframe").setAttribute("src", TECHNOLOGIEPARK_URL);
-        document.getElementById("markt-iframe").setAttribute("src", MARKT_URL);
+            const departure = document.createElement("td");
+            const planned = document.createElement("div");
+            planned.innerText = formatDate(planned_time);
+            const expected = document.createElement("div");
+            expected.innerText = formatDate(expected_time);
+            expected.className = "departure-on-time";
+            if (expected_time > planned_time) {
+                expected.className = "departure-late";
+            }
+            departure.appendChild(planned);
+            departure.appendChild(expected);
+
+            element.appendChild(departure);
+            
+            element.appendChild(createTd(line_number.replace("RNV ", "")));
+            element.appendChild(createTd(destination));
+            return element;
+        }
+
+        async function update_stop(stop_div) {
+            stop_div.innerHTML = "";
+            const table = document.createElement("table");
+
+            // create header
+            const head = document.createElement("thead");
+            const createTh = (text) => {
+                const e = document.createElement("th");
+                e.innerText = text;
+                return e;
+            }
+            head.appendChild(createTh("Abfahrt"))
+            head.appendChild(createTh("Linie"))
+            head.appendChild(createTh("Richtung"))
+            table.appendChild(head);
+
+            const data = await make_vrn_request(stop_div.getAttribute("data-stop-id"));
+            const body = document.createElement("tbody");
+            const departures = data.departureList;
+            departures.map(create_arrival_component).forEach(element => {
+                body.appendChild(element)
+            });
+            table.appendChild(body);
+
+            stop_div.appendChild(table);
+        }
+
+        let stops = document.querySelectorAll("[data-stop-id]");
+        let promises = [];
+        for (let i = 0; i < stops.length; ++i) {
+            const promise = update_stop(stops[i]);
+            promises.push(promise);
+        }
+        await Promise.all(promises);
     })();
 </script>
 
