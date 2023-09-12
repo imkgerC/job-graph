@@ -103,11 +103,11 @@
 </body>
 <script>
     (() => {
-        
 
         const updateCounter = () => {
             localStorage.setItem("counterValue", counterValue);
             document.getElementById("counter").innerText = `${counterValue.toFixed(2)}€`;
+            window.location.hash = "#" + counterValue.toFixed(2);
         }
 
         const incrementCounter = (value) => {
@@ -132,6 +132,10 @@
         let counterValue = Number(localStorage.getItem("counterValue"));
         if (!counterValue) {
             counterValue = 0.0;
+        }
+        if (window.location.hash) {
+            let hash = window.location.hash;
+            counterValue = Number(hash.substring(1));
         }
         updateCounter(counterValue);
     })();
