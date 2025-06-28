@@ -43,6 +43,13 @@
         #counter {
             text-align: center;
         }
+        #lastUpdate {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            padding: 0.25em;
+            font-size: 0.5em;
+        }
         .button {
             background-color: #123456;
             border: none;
@@ -84,6 +91,7 @@
 
 <body>
     <div id="main">
+        <div id="lastUpdate"></div>
         <div id="main-container">
             <div id="counter">0.00€</div>
             <div>
@@ -103,16 +111,46 @@
     </div>
 </body>
 <script>
+    function formatRelativeTime(date1, date2 = new Date()) {
+        const units = [
+            { name: 'year', limit: 31536000000, inSeconds: 60 * 60 * 24 * 365 },
+            { name: 'month', limit: 2592000000, inSeconds: 60 * 60 * 24 * 30 },
+            { name: 'week', limit: 604800000, inSeconds: 60 * 60 * 24 * 7 }, 
+            { name: 'day', limit: 86400000, inSeconds: 60 * 60 * 24 },
+            { name: 'hour', limit: 3600000, inSeconds: 60 * 60 },
+            { name: 'minute', limit: 60000, inSeconds: 60 },
+            { name: 'second', limit: 1000, inSeconds: 1 }
+        ];
+
+        const diff = Math.abs(date1 - date2);
+        const formatter = new Intl.RelativeTimeFormat(navigator.language, { numeric: 'auto' });
+
+        for (const unit of units) {
+            if (diff >= unit.limit) {
+                const value = Math.floor(diff / unit.limit);
+                return formatter.format(Math.sign(date1 - date2) * value, unit.name);
+            }
+        }
+
+        return formatter.format(0, 'second'); // Default to "now" if the difference is very small
+    }
+
     (() => {
 
         const updateCounter = () => {
             localStorage.setItem("counterValue", counterValue);
+            localStorage.setItem("lastUpdate", lastUpdate);
             document.getElementById("counter").innerText = `${counterValue.toFixed(2)}€`;
             window.location.hash = "#" + counterValue.toFixed(2);
         }
 
+        const showLastUpdateTime = () => {
+            document.getElementById("lastUpdate").innerText = "last update: " + formatRelativeTime(lastUpdate, new Date());
+        }
+
         const incrementCounter = (value) => {
             counterValue += value;
+            lastUpdate = new Date();
             updateCounter();
         }
 
@@ -134,11 +172,17 @@
         if (!counterValue) {
             counterValue = 0.0;
         }
+        let lastUpdate = new Date(localStorage.getItem("lastUpdate"));
+        if (!lastUpdate) {
+            lastUpdate = new Date();
+        }
         if (window.location.hash) {
             let hash = window.location.hash;
             counterValue = Number(hash.substring(1));
         }
-        updateCounter(counterValue);
+        updateCounter();
+
+        setInterval(showLastUpdateTime, 1000);
     })();
 </script>
 
