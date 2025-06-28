@@ -145,7 +145,7 @@
         }
 
         const showLastUpdateTime = () => {
-            document.getElementById("lastUpdate").innerText = "last update: " + formatRelativeTime(lastUpdate, new Date());
+            document.getElementById("lastUpdate").innerText = formatRelativeTime(lastUpdate, new Date());
         }
 
         const incrementCounter = (value) => {
