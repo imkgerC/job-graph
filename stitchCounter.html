@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Häkelzähler</title>
+    <link rel="manifest" href="counter.json" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: #FFF;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #main {
+            position: absolute;
+            color: #222;
+            height: 100%;
+            top: 0%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-end;
+            font-size: 4em;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        
+        #main-container {
+            height: 100%;
+            justify-content: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #counter {
+            text-align: center;
+        }
+        #lastUpdate {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            padding: 0.25em;
+            font-size: 0.5em;
+        }
+        .button {
+            background-color: #123456;
+            border: none;
+            color: #eee;
+            padding: 0.5em 1em;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+            margin: 0.1em 0.05em;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #234567;
+        }
+        .button:active {
+            background-color: #123456;
+        }
+        .increment-button {
+            background-color: #125634;
+        }
+        .increment-button:hover {
+            background-color: #236745;
+        }
+        .increment-button:active {
+            background-color: #125634;
+        }
+        .decrement-button {
+            background-color: #561234;
+        }
+        .decrement-button:hover {
+            background-color: #672345;
+        }
+        .decrement-button:active {
+            background-color: #561234;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="lastUpdate"></div>
+        <div id="main-container">
+            <div id="counter">0</div>
+            <div>
+                <button class="button decrement-button" data-increment="-1">-1</button>
+                <button class="button increment-button" data-increment="1">+1</button>
+            </div>
+            <button class="button" id="reset-button">Reset</button>
+        </div>
+    </div>
+</body>
+<script>
+
+    (() => {
+
+        const updateCounter = () => {
+            localStorage.setItem("counterValue", counterValue);
+            localStorage.setItem("lastUpdate", lastUpdate);
+            document.getElementById("counter").innerText = `${Math.round(counterValue)}`;
+            window.location.hash = "#" + Math.round(counterValue);
+        }
+
+        const showLastUpdateTime = () => {
+            document.getElementById("lastUpdate").innerText = new Intl.DateTimeFormat(undefined, {
+                dateStyle: "long",
+                timeStyle: "medium",
+            }).format(lastUpdate);
+        }
+
+        const incrementCounter = (value) => {
+            counterValue += value;
+            lastUpdate = new Date();
+            updateCounter();
+        }
+
+        document.getElementById("reset-button").addEventListener("click", () => {
+            counterValue = 0;
+            updateCounter();
+            localStorage.clear();
+        });
+
+        const buttons = document.querySelectorAll("[data-increment]");
+        for(let i = 0; i < buttons.length; ++i) {
+            buttons[i].addEventListener(
+                "click", 
+                () => incrementCounter(Number(buttons[i].dataset.increment))
+            );
+        };
+
+        let counterValue = Number(localStorage.getItem("counterValue"));
+        if (!counterValue) {
+            counterValue = 0.0;
+        }
+        let lastUpdate = new Date(localStorage.getItem("lastUpdate"));
+        if (!lastUpdate) {
+            lastUpdate = new Date();
+        }
+        if (window.location.hash) {
+            let hash = window.location.hash;
+            counterValue = Number(hash.substring(1));
+        }
+        updateCounter();
+
+        setInterval(showLastUpdateTime, 1000);
+    })();
+</script>
+
+</html>
