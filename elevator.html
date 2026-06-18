@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elevator</title>
+    <style>
+.container {
+    width: 480px;
+    height: 480px;
+    border: 1px solid #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#floor-sign {
+    font: 84pt sans-serif;
+    text-align: center;
+}
+button {
+    font-size: 56pt;
+    padding: 0.3em;
+}
+button:disabled {
+    background-color: wheat;
+}
+button + button {
+    margin-left: 0.3em;
+}
+body {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+    </style>
+</head>
+<body>
+    <div class="container"><canvas id="display" width="480" height="480"></canvas></div>
+    <div class="container"><div id="floor-sign">1</div></div>
+    <div class="container">
+        <button id="btn-1">1</button>
+        <button id="btn-2">2</button>
+        <button id="btn-3">3</button>
+    </div>
+</body>
+<script>
+
+const canvas = document.getElementById('display');
+const ctx = canvas.getContext('2d');
+
+let squareX = 0;
+
+const easeOutQuad = (t) => t * (2 - t);
+
+const doors = {
+    startTime: null,
+    closed: false,
+    duration: 1500,
+    padding: 10,
+    y: canvas.width/4,
+    draw(timestamp) {
+        let startTime = this.startTime;
+        if (startTime == null) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        let percent = elapsed/this.duration;
+        if (percent >= 1) {
+            percent = 0;
+            this.startTime = null;
+            this.closed = !this.closed;
+        }
+        let leftX = this.padding + easeOutQuad(percent) * (canvas.width/2 - this.padding);
+        let rightX = canvas.width - this.padding - easeOutQuad(percent) * (canvas.width/2 - this.padding);
+        if (this.closed) {
+            leftX = canvas.width/2 - easeOutQuad(percent) * (canvas.width/2 - this.padding);
+            rightX = canvas.width/2 + easeOutQuad(percent) * (canvas.width/2 - this.padding);
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(leftX, this.y);
+        ctx.lineTo(leftX, this.y+canvas.height/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(rightX, this.y);
+        ctx.lineTo(rightX, this.y+canvas.height/2);
+        ctx.stroke();
+    },
+}
+
+const arrow = {
+    startTime: null,
+    duration: 1500,
+    padding: 20,
+    y: canvas.height/4,
+    up: true,
+    draw(timestamp) {
+        let startTime = this.startTime;
+        if (startTime == null) startTime = timestamp;
+
+        const elapsed = timestamp - startTime;
+        let percent = elapsed/this.duration;
+        if (percent >= 1) {
+            percent = 1;
+            this.startTime = null;
+        }
+        let offset = -percent * canvas.height * 1.5 + canvas.height/4;
+        if (!this.up) offset = percent * canvas.height * 1.5 + canvas.height/4;
+        if (offset < -canvas.height/2) {
+            offset += 1.5*canvas.height;
+        }
+        if (offset > canvas.height) {
+            offset -= 1.5*canvas.height;
+        }
+        while (offset < -canvas.height/2) {
+            offset += canvas.height;
+        }
+        while (offset > canvas.height) {
+            offset -= canvas.height;
+        }
+        if (this.up) {
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/2, offset);
+            ctx.lineTo(0 + this.padding, canvas.height/2+offset);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/2, offset);
+            ctx.lineTo(canvas.width - this.padding, canvas.height/2+offset);
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(0 + this.padding, offset);
+            ctx.lineTo(canvas.width/2, canvas.height/2+offset);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - this.padding, offset);
+            ctx.lineTo(canvas.width/2, canvas.height/2+offset);
+            ctx.stroke();
+        }
+        this.y = offset;
+    },
+}
+
+const stateMachine = {
+    state: "idle",
+    floor: 1,
+    targetFloors: [],
+    functions: {
+        "idle": (self, timestamp) => {
+            if (self.targetFloors.length == 0) return;
+            self.state = "waitForDoorClose";
+            doors.startTime = timestamp;
+            if (self.targetFloors[0] > self.floor)
+                arrow.up = true;
+            else
+                arrow.up = false;
+        },
+        "waitForDoorClose": (self, timestamp) => {
+            if (doors.startTime) return;
+            if (self.targetFloors[0] > self.floor)
+                self.state = "goUp";
+            else
+                self.state = "goDown";
+            arrow.startTime = timestamp;
+        },
+        "goUp": (self, timestamp) => {
+            if (arrow.startTime) return;
+            self.floor += 1;
+            if (self.targetFloors[0] == self.floor) {
+                self.state = "waitForDoorOpen";
+                doors.startTime = timestamp;
+                return;
+            }
+            arrow.startTime = timestamp;
+        },
+        "goDown": (self, timestamp) => {
+            if (arrow.startTime) return;
+            self.floor -= 1;
+            if (self.targetFloors[0] == self.floor) {
+                self.state = "waitForDoorOpen";
+                doors.startTime = timestamp;
+                return;
+            }
+            arrow.startTime = timestamp;
+        },
+        "waitForDoorOpen": (self, timestamp) => {
+            if (doors.startTime) return;
+            document.querySelector(`#btn-${self.floor}`).disabled = false;
+            if (self.targetFloors[0] != self.floor) alert("Should not happen, not at target floor");
+            self.targetFloors.shift();
+            self.state = "idle";
+        },
+    },
+    advance(timestamp) {
+        this.functions[this.state](this, timestamp);
+    },
+}
+
+for (let i = 1; i < 4; i += 1) {
+    const btn = document.querySelector(`#btn-${i}`);
+    btn.addEventListener("click", () => {
+        if (stateMachine.floor == i && stateMachine.state == "idle")
+            return;
+        stateMachine.targetFloors.push(i);
+        btn.disabled = true;
+    })
+}
+
+const floorSign = document.querySelector("#floor-sign");
+function step(timestamp) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    floorSign.innerText = stateMachine.floor;
+    arrow.draw(timestamp);
+    doors.y = arrow.y;
+    doors.draw(timestamp);
+    stateMachine.advance(timestamp);
+    requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+</script>
+</html>
